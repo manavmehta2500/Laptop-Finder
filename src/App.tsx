@@ -15,10 +15,16 @@ import { COUNTRY_BY_CODE, TRACKED_SITES } from './lib/config';
 import type { Laptop, PriceEventType, SiteInfo } from './lib/types';
 
 const COUNTRY_KEY = 'lf-country';
+const STATIC_POLL_MS = 60_000;
 
 interface Bootstrap {
   laptops: Laptop[];
   sites: SiteInfo[];
+}
+
+interface PriceSnapshot {
+  generatedAt?: string;
+  offers: Record<string, { price: number; oldPrice: number | null; verified?: boolean; verifiedAt?: number | null }>;
 }
 
 function SkeletonCard() {
@@ -42,6 +48,7 @@ function SkeletonCard() {
 export default function App() {
   const [laptops, setLaptops] = useState<Laptop[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'dev' | 'static' | null>(null);
   const [countryCode, setCountryCode] = useState<string | null>(() => {
     const c = localStorage.getItem(COUNTRY_KEY);
     return c && COUNTRY_BY_CODE[c] ? c : null;
@@ -54,9 +61,18 @@ export default function App() {
   const [lastUpdate, setLastUpdate] = useState<number | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
   const toastId = useRef(0);
+  const offersRef = useRef<Map<string, { price: number; oldPrice: number | null }>>(new Map());
 
   const country = countryCode ? COUNTRY_BY_CODE[countryCode] : null;
   const ready = laptops !== null;
+
+  // keep a ref of the current offer prices for diffing
+  useEffect(() => {
+    if (!laptops) return;
+    const m = new Map<string, { price: number; oldPrice: number | null }>();
+    for (const l of laptops) for (const o of l.offers) m.set(o.id, { price: o.price, oldPrice: o.oldPrice });
+    offersRef.current = m;
+  }, [laptops]);
 
   const chooseCountry = useCallback((code: string) => {
     setCountryCode(code);
@@ -67,31 +83,124 @@ export default function App() {
   const patch = useCallback((p: Partial<Filters>) => setFilters((f) => ({ ...f, ...p })), []);
   const resetFilters = useCallback(() => setFilters({ ...DEFAULT_FILTERS }), []);
 
-  // ── bootstrap ─────────────────────────────────────────────────────────────
+  /** Merge a price snapshot into state, diffing against the last known prices. */
+  const applySnapshot = useCallback((snap: PriceSnapshot) => {
+    const prev = offersRef.current;
+    const flashMap: Record<string, { dir: 'up' | 'down'; ts: number }> = {};
+    const events: { type: PriceEventType; laptopId: string; site: string; laptopName: string; price: number; oldPrice: number | null; message: string }[] = [];
+
+    setLaptops((list) => {
+      if (!list) return list;
+      for (const [offerId, p] of Object.entries(snap.offers)) {
+        const before = prev.get(offerId);
+        if (!before) continue;
+        if (before.price === p.price && before.oldPrice === p.oldPrice) continue;
+        const o = list.flatMap((l) => l.offers).find((x) => x.id === offerId);
+        if (!o) continue;
+        const up = p.price > before.price || (p.oldPrice == null && before.oldPrice != null);
+        const owner = list.find((l) => l.offers.some((x) => x.id === offerId));
+        if (owner) {
+          flashMap[owner.id] = { dir: up ? 'up' : 'down', ts: Date.now() };
+          let type: PriceEventType = 'price-drop';
+          if (p.oldPrice != null && before.oldPrice == null) type = 'discount-start';
+          else if (p.oldPrice == null && before.oldPrice != null) type = 'discount-end';
+          else if (p.price < before.price) type = 'price-drop';
+          else type = 'price-rise';
+          events.push({
+            type,
+            laptopId: owner.id,
+            site: o.site,
+            laptopName: owner.name,
+            price: p.price,
+            oldPrice: p.oldPrice,
+            message:
+              type === 'discount-start'
+                ? `${owner.name} went on sale at ${o.site} — ${p.price.toLocaleString('en')} ${o.currency}`
+                : type === 'discount-end'
+                  ? `${owner.name} sale ended at ${o.site} — back to ${p.price.toLocaleString('en')} ${o.currency}`
+                  : type === 'price-drop'
+                    ? `${owner.name} dropped to ${p.price.toLocaleString('en')} ${o.currency} at ${o.site}`
+                    : `${owner.name} is now ${p.price.toLocaleString('en')} ${o.currency} at ${o.site}`,
+          });
+        }
+      }
+      return list.map((l) => ({
+        ...l,
+        offers: l.offers.map((o) => {
+          const p = snap.offers[o.id];
+          return p ? { ...o, price: p.price, oldPrice: p.oldPrice, verified: p.verified ?? true, verifiedAt: p.verifiedAt ?? Date.now() } : o;
+        }),
+      }));
+    });
+
+    if (events.length) {
+      setFlashes((f) => ({ ...f, ...flashMap }));
+      setUpdateCount((c) => c + events.length);
+      setLastUpdate(Date.now());
+      const ids: number[] = [];
+      for (const ev of events.slice(0, 4)) {
+        toastId.current += 1;
+        ids.push(toastId.current);
+        setToasts((t) => [{ id: toastId.current, type: ev.type, message: ev.message }, ...t].slice(0, 4));
+      }
+      for (const id of ids) setTimeout(() => setToasts((cur) => cur.filter((x) => x.id !== id)), 6500);
+      setTimeout(
+        () =>
+          setFlashes((f) => {
+            const n = { ...f };
+            for (const k of Object.keys(n)) if (Date.now() - n[k].ts > 5200) delete n[k];
+            return n;
+          }),
+        5300,
+      );
+    }
+  }, []);
+
+  // ── bootstrap: dev API or static Pages data ──────────────────────────────
   useEffect(() => {
     let alive = true;
-    fetch('/api/bootstrap')
-      .then((r) => {
-        if (!r.ok) throw new Error(`API ${r.status}`);
-        return r.json() as Promise<Bootstrap>;
-      })
-      .then((d) => {
-        if (!alive) return;
-        setLaptops(d.laptops);
-      })
-      .catch((e) => alive && setLoadError(String(e)));
+    (async () => {
+      try {
+        const h = await fetch('/api/health');
+        if (h.ok) {
+          const b = (await (await fetch('/api/bootstrap')).json()) as Bootstrap;
+          if (!alive) return;
+          setMode('dev');
+          setLaptops(b.laptops);
+          return;
+        }
+        throw new Error('api unavailable');
+      } catch {
+        try {
+          const [b, snap] = await Promise.all([
+            fetch('/data/bootstrap.json').then((r) => {
+              if (!r.ok) throw new Error(`bootstrap ${r.status}`);
+              return r.json() as Promise<Bootstrap>;
+            }),
+            fetch('/data/prices.json')
+              .then((r) => (r.ok ? (r.json() as Promise<PriceSnapshot>) : null))
+              .catch(() => null),
+          ]);
+          if (!alive) return;
+          setMode('static');
+          if (snap) applySnapshot(snap);
+          setLaptops(b.laptops);
+        } catch (e) {
+          if (alive) setLoadError(String(e));
+        }
+      }
+    })();
     return () => {
       alive = false;
     };
-  }, []);
+  }, [applySnapshot]);
 
-  // ── live monitor feed (SSE) ───────────────────────────────────────────────
+  // ── dev mode: SSE stream from the monitor ────────────────────────────────
   useEffect(() => {
-    if (!ready) return;
+    if (mode !== 'dev') return;
     let es: EventSource | null = null;
     let retry: ReturnType<typeof setTimeout> | null = null;
     let closed = false;
-
     const connect = () => {
       es = new EventSource('/api/events');
       es.onmessage = (e) => {
@@ -101,48 +210,10 @@ export default function App() {
           return;
         }
         if (msg.type !== 'prices' || !Array.isArray(msg.events)) return;
-        const events = msg.events as { type: PriceEventType; offerId: string; laptopId: string; message: string; price: number; oldPrice: number | null; ts: number }[];
-
-        const flashMap: Record<string, { dir: 'up' | 'down'; ts: number }> = {};
-        for (const ev of events) {
-          flashMap[ev.laptopId] = { dir: ev.type === 'price-rise' || ev.type === 'discount-end' ? 'up' : 'down', ts: ev.ts };
-        }
-
-        setLaptops((prev) => {
-          if (!prev) return prev;
-          return prev.map((l) => {
-            const evs = events.filter((ev) => ev.laptopId === l.id);
-            if (!evs.length) return l;
-            return {
-              ...l,
-              offers: l.offers.map((o) => {
-                const ev = evs.find((x) => x.offerId === o.id);
-                return ev ? { ...o, price: ev.price, oldPrice: ev.oldPrice, updatedAt: ev.ts } : o;
-              }),
-            };
-          });
-        });
-        setFlashes((f) => ({ ...f, ...flashMap }));
-        setUpdateCount((c) => c + events.length);
+        const offers: PriceSnapshot['offers'] = {};
+        for (const ev of msg.events) offers[ev.offerId] = { price: ev.price, oldPrice: ev.oldPrice, verified: true, verifiedAt: ev.ts };
+        applySnapshot({ offers });
         setLastUpdate(Date.now());
-        const ids: number[] = [];
-        for (const ev of events) {
-          toastId.current += 1;
-          ids.push(toastId.current);
-          setToasts((t) => [{ id: toastId.current, type: ev.type, message: ev.message }, ...t].slice(0, 4));
-        }
-        for (const id of ids) {
-          setTimeout(() => setToasts((cur) => cur.filter((x) => x.id !== id)), 6500);
-        }
-        setTimeout(
-          () =>
-            setFlashes((f) => {
-              const n = { ...f };
-              for (const k of Object.keys(n)) if (Date.now() - n[k].ts > 5200) delete n[k];
-              return n;
-            }),
-          5300,
-        );
       };
       es.onerror = () => {
         es?.close();
@@ -155,7 +226,21 @@ export default function App() {
       es?.close();
       if (retry) clearTimeout(retry);
     };
-  }, [ready]);
+  }, [mode, applySnapshot]);
+
+  // ── static mode: poll the 24/7 cron output ───────────────────────────────
+  useEffect(() => {
+    if (mode !== 'static') return;
+    const t = setInterval(async () => {
+      try {
+        const snap = await fetch(`/data/prices.json?t=${Date.now()}`).then((r) => (r.ok ? (r.json() as Promise<PriceSnapshot>) : null));
+        if (snap) applySnapshot(snap);
+      } catch {
+        /* transient — keep polling */
+      }
+    }, STATIC_POLL_MS);
+    return () => clearInterval(t);
+  }, [mode, applySnapshot]);
 
   // ── derived ───────────────────────────────────────────────────────────────
   const results = useMemo(() => (country && laptops ? runFilters(filters, country.code, laptops) : []), [filters, country, laptops]);
@@ -166,7 +251,6 @@ export default function App() {
   const facets = useMemo(() => (country && laptops ? computeFacetCounts(filters, country.code, laptops) : null), [filters, country, laptops]);
   const offerCount = useMemo(() => results.reduce((a, r) => a + r.offers.length, 0), [results]);
 
-  // keep budget inside the current domain when the country/currency changes
   useEffect(() => {
     setFilters((f) => {
       if (!f.budget) return f;
@@ -200,8 +284,8 @@ export default function App() {
       <div className="grid min-h-screen place-items-center p-6">
         <div className="max-w-sm rounded-3xl border border-ink-100 bg-white p-8 text-center shadow-card">
           <CloudOff className="mx-auto text-ink-300" size={40} />
-          <h1 className="mt-4 text-lg font-extrabold text-ink-900">Monitor server unreachable</h1>
-          <p className="mt-1 text-[13px] text-ink-500">The price monitor ({loadError}) is not responding. Start it with <code className="rounded bg-ink-100 px-1">npm run dev</code>.</p>
+          <h1 className="mt-4 text-lg font-extrabold text-ink-900">Could not load the monitor data</h1>
+          <p className="mt-1 text-[13px] text-ink-500">{loadError}</p>
           <button onClick={() => location.reload()} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent-600 px-4 py-2.5 text-[13px] font-bold text-white transition hover:bg-accent-700">
             <RefreshCw size={14} /> Retry
           </button>
@@ -214,7 +298,6 @@ export default function App() {
     <div className="relative min-h-screen">
       <Background />
 
-      {/* animated app window entrance */}
       <motion.div
         initial={{ opacity: 0, y: 26, scale: 0.985 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -231,7 +314,6 @@ export default function App() {
         />
 
         <main className="mx-auto max-w-[1600px] px-4 pb-16 pt-6 sm:px-6">
-          {/* hero strip */}
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink-950 sm:text-3xl">
@@ -255,7 +337,6 @@ export default function App() {
           </div>
 
           <div className="flex items-start gap-5">
-            {/* desktop filter rail */}
             <aside className="sticky top-20 hidden h-[calc(100vh-6.5rem)] w-[308px] shrink-0 lg:block">
               {facets && country ? (
                 <FilterPanel
@@ -272,7 +353,6 @@ export default function App() {
               )}
             </aside>
 
-            {/* results */}
             <section className="min-w-0 flex-1">
               {country && facets ? (
                 <>
@@ -314,7 +394,6 @@ export default function App() {
             </section>
           </div>
 
-          {/* footer */}
           <footer className="mt-10 rounded-2xl border border-ink-100 bg-white/70 px-5 py-4 text-center backdrop-blur">
             <p className="text-[11.5px] leading-relaxed text-ink-400">
               <b className="text-ink-600">Live price monitor</b> — watching {TRACKED_SITES.length} proper retailers & manufacturer stores 24/7 (MediaMarkt, Coolblue, Alternate, Micro Center, Currys, Scan, LDLC, Fnac, Bol, B&H, Best Buy…).
@@ -326,11 +405,9 @@ export default function App() {
         </main>
       </motion.div>
 
-      {/* first-visit country picker */}
       <CountryModal open={!country} chosen={countryCode} onPick={chooseCountry} />
       <CountryModal open={pickerOpen} chosen={countryCode} onPick={chooseCountry} />
 
-      {/* mobile filter drawer */}
       <AnimatePresence>
         {mobileFilters && (
           <>

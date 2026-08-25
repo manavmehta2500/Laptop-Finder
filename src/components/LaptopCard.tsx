@@ -111,8 +111,19 @@ function OfferRow({
       </div>
 
       <div className="mt-2 flex items-center justify-between gap-2">
-        <span className="truncate text-[10.5px] text-ink-400">
-          site price: {o.price.toLocaleString('en', { maximumFractionDigits: 0 })} {o.currency}
+        <span className="flex min-w-0 items-center gap-1 truncate text-[10.5px] text-ink-400">
+          <span className="truncate">
+            site price: {o.price.toLocaleString('en', { maximumFractionDigits: 0 })} {o.currency}
+          </span>
+          {o.verified === false ? (
+            <span className="shrink-0 rounded-full bg-amber-50 px-1.5 py-px font-semibold text-amber-600" title="Site unreachable right now — showing last verified price">
+              unverified
+            </span>
+          ) : o.verifiedAt ? (
+            <span className="shrink-0 rounded-full bg-emerald-50 px-1.5 py-px font-semibold text-emerald-600" title="Last verified by the live monitor">
+              ✓ {Math.max(0, Math.floor((Date.now() - o.verifiedAt) / 60000))}m
+            </span>
+          ) : null}
         </span>
         <a
           href={o.url}

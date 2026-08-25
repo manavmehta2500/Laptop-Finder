@@ -4,11 +4,13 @@
  * Runs the price-monitoring engine and streams live price events to the UI
  * over Server-Sent Events (the browser stays connected 24/7).
  *
- * The monitor keeps a copy of the catalog in memory and applies realistic
- * price events (discounts starting/ending, price drops/rises) exactly the way
- * a real 24/7 scraper of the tracked websites would. To go fully live, point
- * `scanOnce()` at real page fetches (Playwright) for each entry in
- * TRACKED_SITES — the event contract (see /api/events) stays identical.
+ * The monitor keeps a copy of the catalog in memory and, by default
+ * (MONITOR=live), runs the REAL scraper (server/scraper.mjs) over every
+ * tracked offer every SCRAPE_INTERVAL_MS (default 10 min), broadcasting
+ * price/discount changes over SSE. In production the same scrape runs as a
+ * 24/7 GitHub Actions cron job (scripts/cron-scrape.mjs) and the deployed
+ * Pages site simply polls the generated public/data/prices.json.
+ * Set MONITOR=sim to get a fast simulated feed instead (offline dev).
  *
  * Only proper retailers & manufacturer stores are tracked (TRACKED_SITES
  * allow-list). eBay / AliExpress / Alibaba / Temu / private marketplaces are
@@ -18,6 +20,7 @@ import express from 'express';
 import cors from 'cors';
 import { CATALOG } from '../src/data/catalog.mjs';
 import { TRACKED_SITES, COUNTRY_BY_CODE, CURRENCY_SYMBOL } from '../src/data/config.mjs';
+import { scrapeAll, siteSummary } from './scraper.mjs';
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -123,15 +126,66 @@ function scheduleNext() {
   setTimeout(monitorTick, 5000 + Math.random() * 9000);
 }
 
+/* ── live scraping engine ─────────────────────────────────────────────────── */
+const SCRAPE_INTERVAL_MS = Number(process.env.SCRAPE_INTERVAL_MS || 10 * 60 * 1000);
+
+async function runLiveScrape() {
+  console.log(`[monitor] live scrape started (${offerIndex.size} offers)…`);
+  const results = await scrapeAll(laptops, { log: (id, site, what) => console.log(`[monitor] ${site.padEnd(16)} ${what}`) });
+  siteStats = siteSummary(laptops, results);
+  const events = [];
+  for (const { laptop, offer } of offerIndex.values()) {
+    const r = results[offer.id];
+    if (!r || !r.ok) continue;
+    if (r.price === offer.price && r.oldPrice === offer.oldPrice) continue;
+    let type = 'price-drop';
+    if (r.oldPrice != null && offer.oldPrice == null) type = 'discount-start';
+    else if (r.oldPrice == null && offer.oldPrice != null) type = 'discount-end';
+    else if (r.price < offer.price) type = 'price-drop';
+    else type = 'price-rise';
+    offer.price = r.price;
+    offer.oldPrice = r.oldPrice;
+    offer.inStock = r.inStock !== false;
+    offer.updatedAt = Date.now();
+    eventCount += 1;
+    events.push({
+      type,
+      offerId: offer.id,
+      laptopId: laptop.id,
+      site: offer.site,
+      laptopName: laptop.name,
+      price: offer.price,
+      oldPrice: offer.oldPrice,
+      currency: offer.currency,
+      message: describeEvent(type, offer, laptop),
+      ts: Date.now(),
+    });
+  }
+  lastScrapeAt = new Date().toISOString();
+  if (events.length) broadcast({ type: 'prices', events });
+  const ok = Object.values(siteStats).reduce((a, s) => a + s.ok, 0);
+  console.log(`[monitor] live scrape done — ${ok} offers verified live`);
+  scheduleNextLive();
+}
+
+function scheduleNextLive() {
+  setTimeout(() => runLiveScrape().catch((e) => { console.error('[monitor] scrape error:', e.message); scheduleNextLive(); }), SCRAPE_INTERVAL_MS);
+}
+
 // ── Routes ───────────────────────────────────────────────────────────────────
+let lastScrapeAt = null;
+let siteStats = {};
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
+    mode: MODE,
     uptimeSec: Math.floor((Date.now() - startedAt) / 1000),
     laptops: laptops.length,
     offers: offerIndex.size,
     trackedSites: TRACKED_SITES.length,
     eventsEmitted: eventCount,
+    lastScrapeAt,
+    sites: siteStats,
   });
 });
 
@@ -160,7 +214,9 @@ app.get('/api/events', (req, res) => {
   });
 });
 
+const MODE = process.env.MONITOR || 'live';
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[monitor] laptop-finder monitor server on :${PORT} — tracking ${offerIndex.size} offers across ${TRACKED_SITES.length} sites`);
-  scheduleNext();
+  console.log(`[monitor] laptop-finder monitor server on :${PORT} — tracking ${offerIndex.size} offers across ${TRACKED_SITES.length} sites (mode: ${MODE})`);
+  if (MODE === 'sim') scheduleNext();
+  else runLiveScrape().catch((e) => { console.error('[monitor] scrape error:', e.message); scheduleNextLive(); });
 });

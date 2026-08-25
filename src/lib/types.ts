@@ -61,6 +61,10 @@ export interface Offer {
   inStock: boolean;
   /** Updated timestamp (ms) */
   updatedAt: number;
+  /** Live-monitor metadata (set by the monitor, absent in raw seed) */
+  verified?: boolean;
+  verifiedAt?: number | null;
+  scrape?: { kind: string; [k: string]: unknown } | null;
 }
 
 export interface Laptop {

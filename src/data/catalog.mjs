@@ -1,7 +1,7 @@
 
 
 let offerSeq = 0;
-function offer(site, origin, currency, price, oldPrice, url, laptopId) {
+function offer(site, origin, currency, price, oldPrice, url, laptopId, scrape = null) {
   offerSeq += 1;
   return {
     id: `o${offerSeq}-${laptopId}-${origin}`,
@@ -11,6 +11,7 @@ function offer(site, origin, currency, price, oldPrice, url, laptopId) {
     price,
     oldPrice,
     url,
+    scrape,
     inStock: true,
     updatedAt: Date.now(),
   };
@@ -49,9 +50,9 @@ export const CATALOG = [
     year: 2024,
     image: '/images/legion-pro-5.jpg',
     offers: [
-      offer('Lenovo', 'US', 'USD', 1899, 2199, 'https://lenovo.com/us/en/p/laptops/legion-laptops/legion-pro-series/legion-pro-5i-gen-8-(16-inch-intel)/82wk0046us', 'legion-pro-5i'),
-      offer('MediaMarkt.de', 'DE', 'EUR', 1849, null, 'https://www.mediamarkt.de/de/search?searchTerm=Legion%20Pro%205i', 'legion-pro-5i'),
-      offer('Amazon US', 'US', 'USD', 1879, null, 'https://www.amazon.com/s?k=Lenovo+Legion+Pro+5i', 'legion-pro-5i'),
+      offer('Lenovo', 'US', 'USD', 1899, 2199, 'https://lenovo.com/us/en/p/laptops/legion-laptops/legion-pro-series/legion-pro-5i-gen-8-(16-inch-intel)/82wk0046us', 'legion-pro-5i', { kind: 'jsonld', url: 'https://lenovo.com/us/en/p/laptops/legion-laptops/legion-pro-series/legion-pro-5i-gen-8-(16-inch-intel)/82wk0046us' }),
+      offer('MediaMarkt.de', 'DE', 'EUR', 1849, null, 'https://www.mediamarkt.de/de/search?searchTerm=Legion%20Pro%205i', 'legion-pro-5i', { kind: 'skip' }),
+      offer('Amazon US', 'US', 'USD', 1879, null, 'https://www.amazon.com/s?k=Lenovo+Legion+Pro+5i', 'legion-pro-5i', { kind: 'search', url: 'https://www.amazon.com/s?k=Lenovo+Legion+Pro+5i', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
     ],
   },
   {
@@ -75,8 +76,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/rog-strix-g16.jpg',
     offers: [
-      offer('ASUS', 'US', 'USD', 1299, 1499, 'https://rog.asus.com/us/laptops/rog-strix/rog-strix-g16-2024/', 'rog-strix-g16'),
-      offer('MediaMarkt.be', 'BE', 'EUR', 1349, null, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20ROG%20Strix%20G16', 'rog-strix-g16'),
+      offer('ASUS', 'US', 'USD', 1299, 1499, 'https://rog.asus.com/us/laptops/rog-strix/rog-strix-g16-2024/', 'rog-strix-g16', { kind: 'jsonld', url: 'https://rog.asus.com/us/laptops/rog-strix/rog-strix-g16-2024/' }),
+      offer('MediaMarkt.be', 'BE', 'EUR', 1349, null, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20ROG%20Strix%20G16', 'rog-strix-g16', { kind: 'skip' }),
     ],
   },
   {
@@ -100,8 +101,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/rog-zephyrus-g14.jpg',
     offers: [
-      offer('ASUS', 'US', 'USD', 1549, 1799, 'https://rog.asus.com/us/laptops/rog-zephyrus/rog-zephyrus-g14-2024/', 'rog-zephyrus-g14'),
-      offer('Alternate', 'DE', 'EUR', 1529, null, 'https://www.google.com/search?q=site%3Aalternate.de%20ROG%20Zephyrus%20G14', 'rog-zephyrus-g14'),
+      offer('ASUS', 'US', 'USD', 1549, 1799, 'https://rog.asus.com/us/laptops/rog-zephyrus/rog-zephyrus-g14-2024/', 'rog-zephyrus-g14', { kind: 'jsonld', url: 'https://rog.asus.com/us/laptops/rog-zephyrus/rog-zephyrus-g14-2024/' }),
+      offer('Alternate', 'DE', 'EUR', 1529, null, 'https://www.google.com/search?q=site%3Aalternate.de%20ROG%20Zephyrus%20G14', 'rog-zephyrus-g14', { kind: 'skip' }),
     ],
   },
   {
@@ -125,8 +126,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/razer-blade-16.jpg',
     offers: [
-      offer('Razer', 'US', 'USD', 3299, 3699, 'https://www.razer.com/gaming-laptops/razer-blade-16', 'razer-blade-16'),
-      offer('Micro Center', 'US', 'USD', 3249, null, 'https://www.microcenter.com/search/search_results.aspx?q=Razer%20Blade%2016', 'razer-blade-16'),
+      offer('Razer', 'US', 'USD', 3299, 3699, 'https://www.razer.com/gaming-laptops/razer-blade-16', 'razer-blade-16', { kind: 'jsonld', url: 'https://www.razer.com/gaming-laptops/razer-blade-16' }),
+      offer('Micro Center', 'US', 'USD', 3249, null, 'https://www.microcenter.com/search/search_results.aspx?q=Razer%20Blade%2016', 'razer-blade-16', { kind: 'mc' }),
     ],
   },
   {
@@ -150,8 +151,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/msi-katana-15.jpg',
     offers: [
-      offer('Micro Center', 'US', 'USD', 1099, 1249, 'https://www.microcenter.com/search/search_results.aspx?q=MSI%20Katana%2015', 'msi-katana-15'),
-      offer('Best Buy', 'US', 'USD', 1079, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=MSI+Katana+15&intl=nosplash', 'msi-katana-15'),
+      offer('Micro Center', 'US', 'USD', 1099, 1249, 'https://www.microcenter.com/search/search_results.aspx?q=MSI%20Katana%2015', 'msi-katana-15', { kind: 'mc' }),
+      offer('Best Buy', 'US', 'USD', 1079, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=MSI+Katana+15&intl=nosplash', 'msi-katana-15', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=MSI+Katana+15&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -175,8 +176,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/predator-helios-neo-16.jpg',
     offers: [
-      offer('Amazon US', 'US', 'USD', 1699, 1899, 'https://www.amazon.com/s?k=Acer+Predator+Helios+Neo+16', 'predator-helios-neo-16'),
-      offer('Notebooksbilliger', 'DE', 'EUR', 1679, 1799, 'https://www.google.com/search?q=site%3Anotebooksbilliger.de%20Predator%20Helios%20Neo%2016', 'predator-helios-neo-16'),
+      offer('Amazon US', 'US', 'USD', 1699, 1899, 'https://www.amazon.com/s?k=Acer+Predator+Helios+Neo+16', 'predator-helios-neo-16', { kind: 'search', url: 'https://www.amazon.com/s?k=Acer+Predator+Helios+Neo+16', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
+      offer('Notebooksbilliger', 'DE', 'EUR', 1679, 1799, 'https://www.google.com/search?q=site%3Anotebooksbilliger.de%20Predator%20Helios%20Neo%2016', 'predator-helios-neo-16', { kind: 'skip' }),
     ],
   },
   {
@@ -200,8 +201,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/lenovo-loq-15.jpg',
     offers: [
-      offer('Lenovo', 'US', 'USD', 999, 1129, 'https://www.lenovo.com/us/en/search?q=LOQ%2015%20IAH8', 'lenovo-loq-15'),
-      offer('Best Buy', 'US', 'USD', 979, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=Lenovo+LOQ+15&intl=nosplash', 'lenovo-loq-15'),
+      offer('Lenovo', 'US', 'USD', 999, 1129, 'https://www.lenovo.com/us/en/search?q=LOQ%2015%20IAH8', 'lenovo-loq-15', { kind: 'jsonld', url: 'https://www.lenovo.com/us/en/p/laptops/loq-laptops/loq-15-series/lenovo-loq-15irh8/len101q0001' }),
+      offer('Best Buy', 'US', 'USD', 979, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=Lenovo+LOQ+15&intl=nosplash', 'lenovo-loq-15', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Lenovo+LOQ+15&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -225,8 +226,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/hp-omen-16.jpg',
     offers: [
-      offer('HP', 'US', 'USD', 1749, 1999, 'https://www.hp.com/us-en/search?query=Omen%2016', 'hp-omen-16'),
-      offer('MediaMarkt.de', 'DE', 'EUR', 1729, null, 'https://www.google.com/search?q=site%3Amediamaarkt.de%20HP%20Omen%2016', 'hp-omen-16'),
+      offer('HP', 'US', 'USD', 1749, 1999, 'https://www.hp.com/us-en/search?query=Omen%2016', 'hp-omen-16', { kind: 'search', url: 'https://www.hp.com/us-en/search?query=Omen%2016', host: 'www.hp.com', productUrlRe: '/products\\/', brand: 'HP' }),
+      offer('MediaMarkt.de', 'DE', 'EUR', 1729, null, 'https://www.google.com/search?q=site%3Amediamaarkt.de%20HP%20Omen%2016', 'hp-omen-16', { kind: 'skip' }),
     ],
   },
   {
@@ -250,8 +251,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/alienware-m16.jpg',
     offers: [
-      offer('Dell', 'US', 'USD', 1899, 2099, 'https://www.dell.com/en-us/search/alienware-m16', 'alienware-m16'),
-      offer('B&H Photo', 'US', 'USD', 1859, null, 'https://www.bhphotovideo.com/c/search?q=alienware+m16', 'alienware-m16'),
+      offer('Dell', 'US', 'USD', 1899, 2099, 'https://www.dell.com/en-us/search/alienware-m16', 'alienware-m16', { kind: 'search', url: 'https://www.dell.com/en-us/search/alienware-m16', host: 'www.dell.com', productUrlRe: '/\\/spd\\/', brand: 'Dell' }),
+      offer('B&H Photo', 'US', 'USD', 1859, null, 'https://www.bhphotovideo.com/c/search?q=alienware+m16', 'alienware-m16', { kind: 'search', url: 'https://www.bhphotovideo.com/c/search?q=alienware+m16', host: 'www.bhphotovideo.com', productUrlRe: '/\\/p\\/\\d+/', brand: 'B&H' }),
     ],
   },
   {
@@ -275,8 +276,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/asus-tuf-a15.jpg',
     offers: [
-      offer('ASUS', 'US', 'USD', 1199, 1399, 'https://www.asus.com/us/store/laptops/', 'asus-tuf-a15'),
-      offer('Bol.com', 'BE', 'EUR', 1249, 1349, 'https://www.google.com/search?q=site%3Abol.com%20ASUS%20TUF%20Gaming%20A15', 'asus-tuf-a15'),
+      offer('ASUS', 'US', 'USD', 1199, 1399, 'https://www.asus.com/us/store/laptops/', 'asus-tuf-a15', { kind: 'skip' }),
+      offer('Bol.com', 'BE', 'EUR', 1249, 1349, 'https://www.google.com/search?q=site%3Abol.com%20ASUS%20TUF%20Gaming%20A15', 'asus-tuf-a15', { kind: 'skip' }),
     ],
   },
   {
@@ -300,8 +301,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/legion-5.jpg',
     offers: [
-      offer('Lenovo', 'US', 'USD', 1349, 1499, 'https://www.lenovo.com/us/en/search?q=Legion%205%2015.3', 'legion-5'),
-      offer('MediaMarkt.be', 'BE', 'EUR', 1399, 1549, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20Legion%205', 'legion-5'),
+      offer('Lenovo', 'US', 'USD', 1349, 1499, 'https://www.lenovo.com/us/en/search?q=Legion%205%2015.3', 'legion-5', { kind: 'search', url: 'https://www.lenovo.com/us/en/search?q=Legion%205%2015.3', host: 'www.lenovo.com', productUrlRe: '/\\/p\\/laptops\\/', brand: 'Lenovo' }),
+      offer('MediaMarkt.be', 'BE', 'EUR', 1399, 1549, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20Legion%205', 'legion-5', { kind: 'skip' }),
     ],
   },
   {
@@ -325,8 +326,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/razer-blade-14.jpg',
     offers: [
-      offer('Razer', 'US', 'USD', 2299, 2599, 'https://www.razer.com/gaming-laptops/razer-blade-14', 'razer-blade-14'),
-      offer('B&H Photo', 'US', 'USD', 2249, null, 'https://www.bhphotovideo.com/c/search?q=razer+blade+14', 'razer-blade-14'),
+      offer('Razer', 'US', 'USD', 2299, 2599, 'https://www.razer.com/gaming-laptops/razer-blade-14', 'razer-blade-14', { kind: 'jsonld', url: 'https://www.razer.com/gaming-laptops/razer-blade-14' }),
+      offer('B&H Photo', 'US', 'USD', 2249, null, 'https://www.bhphotovideo.com/c/search?q=razer+blade+14', 'razer-blade-14', { kind: 'search', url: 'https://www.bhphotovideo.com/c/search?q=razer+blade+14', host: 'www.bhphotovideo.com', productUrlRe: '/\\/p\\/\\d+/', brand: 'B&H' }),
     ],
   },
   {
@@ -350,8 +351,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/gigabyte-aero-16.jpg',
     offers: [
-      offer('B&H Photo', 'US', 'USD', 2099, 2299, 'https://www.bhphotovideo.com/c/search?q=gigabyte+aero+16', 'gigabyte-aero-16'),
-      offer('Micro Center', 'US', 'USD', 2049, null, 'https://www.microcenter.com/search/search_results.aspx?q=Gigabyte%20Aero%2016', 'gigabyte-aero-16'),
+      offer('B&H Photo', 'US', 'USD', 2099, 2299, 'https://www.bhphotovideo.com/c/search?q=gigabyte+aero+16', 'gigabyte-aero-16', { kind: 'search', url: 'https://www.bhphotovideo.com/c/search?q=gigabyte+aero+16', host: 'www.bhphotovideo.com', productUrlRe: '/\\/p\\/\\d+/', brand: 'B&H' }),
+      offer('Micro Center', 'US', 'USD', 2049, null, 'https://www.microcenter.com/search/search_results.aspx?q=Gigabyte%20Aero%2016', 'gigabyte-aero-16', { kind: 'mc' }),
     ],
   },
   {
@@ -375,8 +376,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/acer-nitro-v-15.jpg',
     offers: [
-      offer('Amazon US', 'US', 'USD', 949, 1099, 'https://www.amazon.com/s?k=Acer+Nitro+V+15', 'acer-nitro-v-15'),
-      offer('MediaMarkt.be', 'BE', 'EUR', 999, 1099, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20Nitro%20V%2015', 'acer-nitro-v-15'),
+      offer('Amazon US', 'US', 'USD', 949, 1099, 'https://www.amazon.com/s?k=Acer+Nitro+V+15', 'acer-nitro-v-15', { kind: 'search', url: 'https://www.amazon.com/s?k=Acer+Nitro+V+15', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
+      offer('MediaMarkt.be', 'BE', 'EUR', 999, 1099, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20Nitro%20V%2015', 'acer-nitro-v-15', { kind: 'skip' }),
     ],
   },
   {
@@ -400,8 +401,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/dell-g15.jpg',
     offers: [
-      offer('Dell', 'US', 'USD', 999, 1149, 'https://www.dell.com/en-us/search/dell-g15', 'dell-g15'),
-      offer('Micro Center', 'US', 'USD', 979, null, 'https://www.microcenter.com/search/search_results.aspx?q=Dell%20G15', 'dell-g15'),
+      offer('Dell', 'US', 'USD', 999, 1149, 'https://www.dell.com/en-us/search/dell-g15', 'dell-g15', { kind: 'search', url: 'https://www.dell.com/en-us/search/dell-g15', host: 'www.dell.com', productUrlRe: '/\\/spd\\/', brand: 'Dell' }),
+      offer('Micro Center', 'US', 'USD', 979, null, 'https://www.microcenter.com/search/search_results.aspx?q=Dell%20G15', 'dell-g15', { kind: 'mc' }),
     ],
   },
   {
@@ -425,8 +426,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/msi-stealth-16.jpg',
     offers: [
-      offer('Micro Center', 'US', 'USD', 1899, 2099, 'https://www.microcenter.com/search/search_results.aspx?q=MSI%20Stealth%2016%20AI', 'msi-stealth-16-ai'),
-      offer('B&H Photo', 'US', 'USD', 1849, null, 'https://www.bhphotovideo.com/c/search?q=msi+stealth+16+ai', 'msi-stealth-16-ai'),
+      offer('Micro Center', 'US', 'USD', 1899, 2099, 'https://www.microcenter.com/search/search_results.aspx?q=MSI%20Stealth%2016%20AI', 'msi-stealth-16-ai', { kind: 'mc' }),
+      offer('B&H Photo', 'US', 'USD', 1849, null, 'https://www.bhphotovideo.com/c/search?q=msi+stealth+16+ai', 'msi-stealth-16-ai', { kind: 'search', url: 'https://www.bhphotovideo.com/c/search?q=msi+stealth+16+ai', host: 'www.bhphotovideo.com', productUrlRe: '/\\/p\\/\\d+/', brand: 'B&H' }),
     ],
   },
 
@@ -452,8 +453,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/macbook-pro-14.jpg',
     offers: [
-      offer('Apple', 'US', 'USD', 1999, null, 'https://www.apple.com/shop/buy-mac/macbook-pro', 'macbook-pro-14-m4pro'),
-      offer('Apple BE', 'BE', 'EUR', 1999, null, 'https://www.apple.com/be-nl/shop/buy-mac/macbook-pro', 'macbook-pro-14-m4pro'),
+      offer('Apple', 'US', 'USD', 1999, null, 'https://www.apple.com/shop/buy-mac/macbook-pro', 'macbook-pro-14-m4pro', { kind: 'apple', url: 'https://www.apple.com/shop/buy-mac/macbook-pro' }),
+      offer('Apple BE', 'BE', 'EUR', 1999, null, 'https://www.apple.com/be-nl/shop/buy-mac/macbook-pro', 'macbook-pro-14-m4pro', { kind: 'apple', url: 'https://www.apple.com/be-nl/shop/buy-mac/macbook-pro' }),
     ],
   },
   {
@@ -477,8 +478,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/macbook-pro-16.jpg',
     offers: [
-      offer('Apple', 'US', 'USD', 2499, 2699, 'https://www.apple.com/shop/buy-mac/macbook-pro', 'macbook-pro-16-m4pro'),
-      offer('Apple BE', 'BE', 'EUR', 2499, null, 'https://www.apple.com/be-nl/shop/buy-mac/macbook-pro', 'macbook-pro-16-m4pro'),
+      offer('Apple', 'US', 'USD', 2499, 2699, 'https://www.apple.com/shop/buy-mac/macbook-pro', 'macbook-pro-16-m4pro', { kind: 'apple', url: 'https://www.apple.com/shop/buy-mac/macbook-pro' }),
+      offer('Apple BE', 'BE', 'EUR', 2499, null, 'https://www.apple.com/be-nl/shop/buy-mac/macbook-pro', 'macbook-pro-16-m4pro', { kind: 'apple', url: 'https://www.apple.com/be-nl/shop/buy-mac/macbook-pro' }),
     ],
   },
   {
@@ -502,8 +503,8 @@ export const CATALOG = [
     year: 2025,
     image: '/images/macbook-air-15.jpg',
     offers: [
-      offer('Apple', 'US', 'USD', 1199, 1399, 'https://www.apple.com/shop/buy-mac/macbook-air', 'macbook-air-15-m4'),
-      offer('Best Buy', 'US', 'USD', 1179, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=MacBook+Air+15+M4&intl=nosplash', 'macbook-air-15-m4'),
+      offer('Apple', 'US', 'USD', 1199, 1399, 'https://www.apple.com/shop/buy-mac/macbook-air', 'macbook-air-15-m4', { kind: 'apple', url: 'https://www.apple.com/shop/buy-mac/macbook-air' }),
+      offer('Best Buy', 'US', 'USD', 1179, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=MacBook+Air+15+M4&intl=nosplash', 'macbook-air-15-m4', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=MacBook+Air+15+M4&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -527,8 +528,8 @@ export const CATALOG = [
     year: 2025,
     image: '/images/macbook-air-13.jpg',
     offers: [
-      offer('Apple', 'US', 'USD', 999, 1099, 'https://www.apple.com/shop/buy-mac/macbook-air', 'macbook-air-13-m4'),
-      offer('Amazon US', 'US', 'USD', 989, null, 'https://www.amazon.com/s?k=MacBook+Air+13+M4', 'macbook-air-13-m4'),
+      offer('Apple', 'US', 'USD', 999, 1099, 'https://www.apple.com/shop/buy-mac/macbook-air', 'macbook-air-13-m4', { kind: 'apple', url: 'https://www.apple.com/shop/buy-mac/macbook-air' }),
+      offer('Amazon US', 'US', 'USD', 989, null, 'https://www.amazon.com/s?k=MacBook+Air+13+M4', 'macbook-air-13-m4', { kind: 'search', url: 'https://www.amazon.com/s?k=MacBook+Air+13+M4', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
     ],
   },
   {
@@ -552,7 +553,7 @@ export const CATALOG = [
     year: 2025,
     image: '/images/dell-14-premium.png',
     offers: [
-      offer('Dell', 'US', 'USD', 1499, 1649, 'https://www.dell.com/en-us/shop/dell-laptops/dell-14-premium-laptop/spd/dell-da14250-laptop/useda14250hcto01', 'dell-14-premium'),
+      offer('Dell', 'US', 'USD', 1499, 1649, 'https://www.dell.com/en-us/shop/dell-laptops/dell-14-premium-laptop/spd/dell-da14250-laptop/useda14250hcto01', 'dell-14-premium', { kind: 'jsonld', url: 'https://www.dell.com/en-us/shop/dell-laptops/dell-14-premium-laptop/spd/dell-da14250-laptop/useda14250hcto01' }),
     ],
   },
   {
@@ -576,8 +577,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/thinkpad-x1-carbon.png',
     offers: [
-      offer('Lenovo', 'US', 'USD', 1999, 2299, 'https://www.lenovo.com/us/en/search?q=ThinkPad%20X1%20Carbon%20Gen%2012', 'thinkpad-x1-carbon'),
-      offer('Lenovo BE', 'BE', 'EUR', 2049, null, 'https://www.lenovo.be/en/search?q=ThinkPad%20X1%20Carbon', 'thinkpad-x1-carbon'),
+      offer('Lenovo', 'US', 'USD', 1999, 2299, 'https://www.lenovo.com/us/en/search?q=ThinkPad%20X1%20Carbon%20Gen%2012', 'thinkpad-x1-carbon', { kind: 'jsonld', url: 'https://www.lenovo.com/us/outletus/en/p/laptops/thinkpad/thinkpadx1/thinkpad-x1-carbon-gen-12-14-inch-intel/21kcctr1ww' }),
+      offer('Lenovo BE', 'BE', 'EUR', 2049, null, 'https://www.lenovo.be/en/search?q=ThinkPad%20X1%20Carbon', 'thinkpad-x1-carbon', { kind: 'search', url: 'https://www.lenovo.be/en/search?q=ThinkPad%20X1%20Carbon', host: 'www.lenovo.be', productUrlRe: '/\\/p\\/', brand: 'Lenovo' }),
     ],
   },
   {
@@ -601,8 +602,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/thinkpad-t14s.png',
     offers: [
-      offer('Lenovo', 'US', 'USD', 1449, 1699, 'https://www.lenovo.com/us/en/search?q=ThinkPad%20T14s%20Gen%206', 'thinkpad-t14s'),
-      offer('Notebooksbilliger', 'DE', 'EUR', 1429, null, 'https://www.google.com/search?q=site%3Anotebooksbilliger.de%20ThinkPad%20T14s%20Gen%206', 'thinkpad-t14s'),
+      offer('Lenovo', 'US', 'USD', 1449, 1699, 'https://www.lenovo.com/us/en/search?q=ThinkPad%20T14s%20Gen%206', 'thinkpad-t14s', { kind: 'jsonld', url: 'https://www.lenovo.com/us/en/p/laptops/thinkpad/thinkpadt/thinkpad-t14s-gen-6-14-inch-intel/len101t0113' }),
+      offer('Notebooksbilliger', 'DE', 'EUR', 1429, null, 'https://www.google.com/search?q=site%3Anotebooksbilliger.de%20ThinkPad%20T14s%20Gen%206', 'thinkpad-t14s', { kind: 'skip' }),
     ],
   },
   {
@@ -626,8 +627,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/spectre-x360.jpg',
     offers: [
-      offer('HP', 'US', 'USD', 1799, 1999, 'https://www.hp.com/us-en/search?query=Spectre%20x360%2014', 'hp-spectre-x360-14'),
-      offer('Best Buy', 'US', 'USD', 1749, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=HP+Spectre+x360+14&intl=nosplash', 'hp-spectre-x360-14'),
+      offer('HP', 'US', 'USD', 1799, 1999, 'https://www.hp.com/us-en/search?query=Spectre%20x360%2014', 'hp-spectre-x360-14', { kind: 'search', url: 'https://www.hp.com/us-en/search?query=Spectre%20x360%2014', host: 'www.hp.com', productUrlRe: '/products\\/', brand: 'HP' }),
+      offer('Best Buy', 'US', 'USD', 1749, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=HP+Spectre+x360+14&intl=nosplash', 'hp-spectre-x360-14', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=HP+Spectre+x360+14&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -651,8 +652,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/yoga-9i.jpg',
     offers: [
-      offer('Lenovo', 'US', 'USD', 1699, 1899, 'https://www.lenovo.com/us/en/search?q=Yoga%209i%202-in-1', 'yoga-9i'),
-      offer('Best Buy', 'US', 'USD', 1649, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=Lenovo+Yoga+9i&intl=nosplash', 'yoga-9i'),
+      offer('Lenovo', 'US', 'USD', 1699, 1899, 'https://www.lenovo.com/us/en/search?q=Yoga%209i%202-in-1', 'yoga-9i', { kind: 'jsonld', url: 'https://www.lenovo.com/us/en/p/laptops/yoga/yoga-2-in-1-series/lenovo-yoga-9i-2-in-1-gen-9-14-inch-intel/len101y0043' }),
+      offer('Best Buy', 'US', 'USD', 1649, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=Lenovo+Yoga+9i&intl=nosplash', 'yoga-9i', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Lenovo+Yoga+9i&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -676,8 +677,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/framework-13.jpg',
     offers: [
-      offer('Framework', 'US', 'USD', 1599, null, 'https://frame.work/products/laptop-diy-13-gen-amd', 'framework-13'),
-      offer('Best Buy', 'US', 'USD', 1649, 1799, 'https://www.bestbuy.com/site/searchpage.jsp?st=Framework+Laptop+13&intl=nosplash', 'framework-13'),
+      offer('Framework', 'US', 'USD', 1599, null, 'https://frame.work/products/laptop-diy-13-gen-amd', 'framework-13', { kind: 'shopify', store: 'frame.work', handle: 'laptop-diy-13-gen-amd' }),
+      offer('Best Buy', 'US', 'USD', 1649, 1799, 'https://www.bestbuy.com/site/searchpage.jsp?st=Framework+Laptop+13&intl=nosplash', 'framework-13', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Framework+Laptop+13&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -701,8 +702,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/surface-laptop-7.jpg',
     offers: [
-      offer('Microsoft Store', 'US', 'USD', 1399, 1599, 'https://www.microsoft.com/en-us/search/results?q=surface+laptop+7', 'surface-laptop-7'),
-      offer('Best Buy', 'US', 'USD', 1379, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=Surface+Laptop+7&intl=nosplash', 'surface-laptop-7'),
+      offer('Microsoft Store', 'US', 'USD', 1399, 1599, 'https://www.microsoft.com/en-us/search/results?q=surface+laptop+7', 'surface-laptop-7', { kind: 'search', url: 'https://www.microsoft.com/en-us/search/results?q=surface+laptop+7', host: 'www.microsoft.com', productUrlRe: '/\\/store\\/', brand: 'Microsoft' }),
+      offer('Best Buy', 'US', 'USD', 1379, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=Surface+Laptop+7&intl=nosplash', 'surface-laptop-7', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Surface+Laptop+7&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -726,8 +727,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/galaxy-book4-ultra.jpg',
     offers: [
-      offer('Samsung', 'US', 'USD', 1899, 2199, 'https://www.samsung.com/us/search/?q=galaxy+book4+ultra', 'galaxy-book4-ultra'),
-      offer('Currys', 'UK', 'GBP', 1799, 1999, 'https://www.currys.co.uk/search?q=Galaxy%20Book4%20Ultra', 'galaxy-book4-ultra'),
+      offer('Samsung', 'US', 'USD', 1899, 2199, 'https://www.samsung.com/us/search/?q=galaxy+book4+ultra', 'galaxy-book4-ultra', { kind: 'search', url: 'https://www.samsung.com/us/search/?q=galaxy+book4+ultra', host: 'www.samsung.com', productUrlRe: '/\\/laptops\\/', brand: 'Samsung' }),
+      offer('Currys', 'UK', 'GBP', 1799, 1999, 'https://www.currys.co.uk/search?q=Galaxy%20Book4%20Ultra', 'galaxy-book4-ultra', { kind: 'search', url: 'https://www.currys.co.uk/search?q=Galaxy%20Book4%20Ultra', host: 'www.currys.co.uk', productUrlRe: '/\\/products\\/', brand: 'Currys' }),
     ],
   },
   {
@@ -751,8 +752,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/galaxy-book4.jpg',
     offers: [
-      offer('Samsung', 'US', 'USD', 1299, 1499, 'https://www.samsung.com/us/search/?q=galaxy+book4+16', 'galaxy-book4'),
-      offer('MediaMarkt.de', 'DE', 'EUR', 1279, null, 'https://www.google.com/search?q=site%3Amediamaarkt.de%20Galaxy%20Book4', 'galaxy-book4'),
+      offer('Samsung', 'US', 'USD', 1299, 1499, 'https://www.samsung.com/us/search/?q=galaxy+book4+16', 'galaxy-book4', { kind: 'search', url: 'https://www.samsung.com/us/search/?q=galaxy+book4+16', host: 'www.samsung.com', productUrlRe: '/\\/laptops\\/', brand: 'Samsung' }),
+      offer('MediaMarkt.de', 'DE', 'EUR', 1279, null, 'https://www.google.com/search?q=site%3Amediamaarkt.de%20Galaxy%20Book4', 'galaxy-book4', { kind: 'skip' }),
     ],
   },
   {
@@ -776,8 +777,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/proart-p16.webp',
     offers: [
-      offer('ASUS', 'US', 'USD', 2499, 2799, 'https://www.asus.com/us/laptops/for-home/all-series/filter?Series=ProArt', 'asus-proart-p16'),
-      offer('B&H Photo', 'US', 'USD', 2449, null, 'https://www.bhphotovideo.com/c/search?q=proart+p16', 'asus-proart-p16'),
+      offer('ASUS', 'US', 'USD', 2499, 2799, 'https://www.asus.com/us/laptops/for-home/all-series/filter?Series=ProArt', 'asus-proart-p16', { kind: 'skip' }),
+      offer('B&H Photo', 'US', 'USD', 2449, null, 'https://www.bhphotovideo.com/c/search?q=proart+p16', 'asus-proart-p16', { kind: 'search', url: 'https://www.bhphotovideo.com/c/search?q=proart+p16', host: 'www.bhphotovideo.com', productUrlRe: '/\\/p\\/\\d+/', brand: 'B&H' }),
     ],
   },
   {
@@ -801,8 +802,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/zenbook-pro-16x.png',
     offers: [
-      offer('ASUS', 'US', 'USD', 2299, 2599, 'https://www.asus.com/us/laptops/for-home/all-series/filter?Series=Zenbook', 'zenbook-pro-16x'),
-      offer('Notebooksbilliger', 'DE', 'EUR', 2249, 2499, 'https://www.google.com/search?q=site%3Anotebooksbilliger.de%20Zenbook%20Pro%2016X', 'zenbook-pro-16x'),
+      offer('ASUS', 'US', 'USD', 2299, 2599, 'https://www.asus.com/us/laptops/for-home/all-series/filter?Series=Zenbook', 'zenbook-pro-16x', { kind: 'skip' }),
+      offer('Notebooksbilliger', 'DE', 'EUR', 2249, 2499, 'https://www.google.com/search?q=site%3Anotebooksbilliger.de%20Zenbook%20Pro%2016X', 'zenbook-pro-16x', { kind: 'skip' }),
     ],
   },
 
@@ -828,8 +829,8 @@ export const CATALOG = [
     year: 2025,
     image: '/images/zenbook-14.webp',
     offers: [
-      offer('ASUS', 'US', 'USD', 1299, 1499, 'https://www.asus.com/us/laptops/for-home/all-series/filter?SubSeries=Zenbook', 'zenbook-14'),
-      offer('Coolblue', 'BE', 'EUR', 1249, 1399, 'https://www.google.com/search?q=site%3Acoolblue.be%20Zenbook%2014', 'zenbook-14'),
+      offer('ASUS', 'US', 'USD', 1299, 1499, 'https://www.asus.com/us/laptops/for-home/all-series/filter?SubSeries=Zenbook', 'zenbook-14', { kind: 'skip' }),
+      offer('Coolblue', 'BE', 'EUR', 1249, 1399, 'https://www.google.com/search?q=site%3Acoolblue.be%20Zenbook%2014', 'zenbook-14', { kind: 'skip' }),
     ],
   },
   {
@@ -853,8 +854,8 @@ export const CATALOG = [
     year: 2025,
     image: '/images/swift-go-14.jpg',
     offers: [
-      offer('Amazon US', 'US', 'USD', 999, 1199, 'https://www.amazon.com/s?k=Acer+Swift+Go+14', 'swift-go-14'),
-      offer('Currys', 'UK', 'GBP', 899, null, 'https://www.currys.co.uk/search?q=Swift%20Go%2014', 'swift-go-14'),
+      offer('Amazon US', 'US', 'USD', 999, 1199, 'https://www.amazon.com/s?k=Acer+Swift+Go+14', 'swift-go-14', { kind: 'search', url: 'https://www.amazon.com/s?k=Acer+Swift+Go+14', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
+      offer('Currys', 'UK', 'GBP', 899, null, 'https://www.currys.co.uk/search?q=Swift%20Go%2014', 'swift-go-14', { kind: 'search', url: 'https://www.currys.co.uk/search?q=Swift%20Go%2014', host: 'www.currys.co.uk', productUrlRe: '/\\/products\\/', brand: 'Currys' }),
     ],
   },
   {
@@ -878,8 +879,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/ideapad-pro-5.jpg',
     offers: [
-      offer('Lenovo', 'US', 'USD', 1049, 1199, 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Pro%205%2016', 'ideapad-pro-5'),
-      offer('MediaMarkt.fr', 'FR', 'EUR', 1029, 1149, 'https://www.google.com/search?q=site%3Amediamaarkt.fr%20IdeaPad%20Pro%205', 'ideapad-pro-5'),
+      offer('Lenovo', 'US', 'USD', 1049, 1199, 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Pro%205%2016', 'ideapad-pro-5', { kind: 'search', url: 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Pro%205%2016', host: 'www.lenovo.com', productUrlRe: '/\\/p\\/laptops\\/', brand: 'Lenovo' }),
+      offer('MediaMarkt.fr', 'FR', 'EUR', 1029, 1149, 'https://www.google.com/search?q=site%3Amediamaarkt.fr%20IdeaPad%20Pro%205', 'ideapad-pro-5', { kind: 'skip' }),
     ],
   },
   {
@@ -903,8 +904,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/vivobook-16.jpg',
     offers: [
-      offer('Bol.com', 'BE', 'EUR', 799, 899, 'https://www.google.com/search?q=site%3Abol.com%20ASUS%20VivoBook%2016', 'vivobook-16'),
-      offer('MediaMarkt.be', 'BE', 'EUR', 779, null, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20VivoBook%2016', 'vivobook-16'),
+      offer('Bol.com', 'BE', 'EUR', 799, 899, 'https://www.google.com/search?q=site%3Abol.com%20ASUS%20VivoBook%2016', 'vivobook-16', { kind: 'skip' }),
+      offer('MediaMarkt.be', 'BE', 'EUR', 779, null, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20VivoBook%2016', 'vivobook-16', { kind: 'skip' }),
     ],
   },
   {
@@ -928,8 +929,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/ideapad-slim-5.jpg',
     offers: [
-      offer('Lenovo', 'US', 'USD', 949, 1049, 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Slim%205%2014', 'ideapad-slim-5'),
-      offer('Coolblue', 'BE', 'EUR', 899, 999, 'https://www.google.com/search?q=site%3Acoolblue.be%20IdeaPad%20Slim%205%2014', 'ideapad-slim-5'),
+      offer('Lenovo', 'US', 'USD', 949, 1049, 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Slim%205%2014', 'ideapad-slim-5', { kind: 'search', url: 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Slim%205%2014', host: 'www.lenovo.com', productUrlRe: '/\\/p\\/laptops\\/', brand: 'Lenovo' }),
+      offer('Coolblue', 'BE', 'EUR', 899, 999, 'https://www.google.com/search?q=site%3Acoolblue.be%20IdeaPad%20Slim%205%2014', 'ideapad-slim-5', { kind: 'skip' }),
     ],
   },
   {
@@ -953,8 +954,8 @@ export const CATALOG = [
     year: 2024,
     image: '/images/pavilion-plus-14.jpg',
     offers: [
-      offer('HP', 'US', 'USD', 899, 999, 'https://www.hp.com/us-en/search?query=Pavilion%20Plus%2014', 'hp-pavilion-plus-14'),
-      offer('MediaMarkt.fr', 'FR', 'EUR', 859, null, 'https://www.google.com/search?q=site%3Amediamaarkt.fr%20Pavilion%20Plus%2014', 'hp-pavilion-plus-14'),
+      offer('HP', 'US', 'USD', 899, 999, 'https://www.hp.com/us-en/search?query=Pavilion%20Plus%2014', 'hp-pavilion-plus-14', { kind: 'search', url: 'https://www.hp.com/us-en/search?query=Pavilion%20Plus%2014', host: 'www.hp.com', productUrlRe: '/products\\/', brand: 'HP' }),
+      offer('MediaMarkt.fr', 'FR', 'EUR', 859, null, 'https://www.google.com/search?q=site%3Amediamaarkt.fr%20Pavilion%20Plus%2014', 'hp-pavilion-plus-14', { kind: 'skip' }),
     ],
   },
   {
@@ -978,8 +979,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/ideapad-flex-5.webp',
     offers: [
-      offer('Lenovo', 'US', 'USD', 649, 729, 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Flex%205%2015.6', 'ideapad-flex-5'),
-      offer('Amazon US', 'US', 'USD', 629, null, 'https://www.amazon.com/s?k=IdeaPad+Flex+5+15.6', 'ideapad-flex-5'),
+      offer('Lenovo', 'US', 'USD', 649, 729, 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Flex%205%2015.6', 'ideapad-flex-5', { kind: 'search', url: 'https://www.lenovo.com/us/en/search?q=IdeaPad%20Flex%205%2015.6', host: 'www.lenovo.com', productUrlRe: '/\\/p\\/laptops\\/', brand: 'Lenovo' }),
+      offer('Amazon US', 'US', 'USD', 629, null, 'https://www.amazon.com/s?k=IdeaPad+Flex+5+15.6', 'ideapad-flex-5', { kind: 'search', url: 'https://www.amazon.com/s?k=IdeaPad+Flex+5+15.6', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
     ],
   },
   {
@@ -1003,8 +1004,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/pavilion-15.jpg',
     offers: [
-      offer('HP', 'US', 'USD', 599, 679, 'https://www.hp.com/us-en/search?query=Pavilion%2015', 'hp-pavilion-15'),
-      offer('Best Buy', 'US', 'USD', 579, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=HP+Pavilion+15&intl=nosplash', 'hp-pavilion-15'),
+      offer('HP', 'US', 'USD', 599, 679, 'https://www.hp.com/us-en/search?query=Pavilion%2015', 'hp-pavilion-15', { kind: 'search', url: 'https://www.hp.com/us-en/search?query=Pavilion%2015', host: 'www.hp.com', productUrlRe: '/products\\/', brand: 'HP' }),
+      offer('Best Buy', 'US', 'USD', 579, null, 'https://www.bestbuy.com/site/searchpage.jsp?st=HP+Pavilion+15&intl=nosplash', 'hp-pavilion-15', { kind: 'search', url: 'https://www.bestbuy.com/site/searchpage.jsp?st=HP+Pavilion+15&intl=nosplash', host: 'www.bestbuy.com', productUrlRe: '\\.pcm', brand: 'Best Buy' }),
     ],
   },
   {
@@ -1028,8 +1029,8 @@ export const CATALOG = [
     year: 2023,
     image: '/images/aspire-go-15.jpg',
     offers: [
-      offer('Amazon US', 'US', 'USD', 499, 549, 'https://www.amazon.com/s?k=Acer+Aspire+Go+15', 'aspire-go-15'),
-      offer('MediaMarkt.be', 'BE', 'EUR', 549, null, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20Aspire%20Go%2015', 'aspire-go-15'),
+      offer('Amazon US', 'US', 'USD', 499, 549, 'https://www.amazon.com/s?k=Acer+Aspire+Go+15', 'aspire-go-15', { kind: 'search', url: 'https://www.amazon.com/s?k=Acer+Aspire+Go+15', host: 'www.amazon.com', productUrlRe: '/\\/dp\\//', brand: 'Amazon' }),
+      offer('MediaMarkt.be', 'BE', 'EUR', 549, null, 'https://www.google.com/search?q=site%3Amediamaarkt.be%20Aspire%20Go%2015', 'aspire-go-15', { kind: 'skip' }),
     ],
   },
 ];
