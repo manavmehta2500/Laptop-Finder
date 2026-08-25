@@ -1,9 +1,10 @@
 {
-  "generatedAt": "2026-08-25T00:29:03.687Z",
-  "generator": "laptop-finder monitor (github actions cron)",
-  "durationMs": 383,
+  "generatedAt": "2026-08-25T00:37:57.348Z",
+  "generator": "laptop-finder monitor (24/7 cron)",
+  "durationMs": 1247,
   "liveCount": 0,
   "keptCount": 80,
+  "badLinks": 15,
   "sites": {
     "Lenovo": {
       "scraped": 9,
@@ -125,16 +126,18 @@
     "o1-legion-pro-5i-US": {
       "price": 1899,
       "oldPrice": 2199,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "http 0 fetch failed"
+      "lastNote": "http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o2-legion-pro-5i-DE": {
       "price": 1849,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -143,7 +146,7 @@
     "o3-legion-pro-5i-US": {
       "price": 1879,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -152,7 +155,7 @@
     "o4-rog-strix-g16-US": {
       "price": 1299,
       "oldPrice": 1499,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -161,7 +164,7 @@
     "o5-rog-strix-g16-BE": {
       "price": 1349,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -170,16 +173,18 @@
     "o6-rog-zephyrus-g14-US": {
       "price": 1549,
       "oldPrice": 1799,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "http 0 fetch failed"
+      "lastNote": "http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o7-rog-zephyrus-g14-DE": {
       "price": 1529,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -188,7 +193,7 @@
     "o8-razer-blade-16-US": {
       "price": 3299,
       "oldPrice": 3699,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -197,7 +202,7 @@
     "o9-razer-blade-16-US": {
       "price": 3249,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -206,7 +211,7 @@
     "o10-msi-katana-15-US": {
       "price": 1099,
       "oldPrice": 1249,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -215,16 +220,18 @@
     "o11-msi-katana-15-US": {
       "price": 1079,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "search http 0 fetch failed"
+      "lastNote": "search http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o12-predator-helios-neo-16-US": {
       "price": 1699,
       "oldPrice": 1899,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -233,7 +240,7 @@
     "o13-predator-helios-neo-16-DE": {
       "price": 1679,
       "oldPrice": 1799,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -242,7 +249,7 @@
     "o14-lenovo-loq-15-US": {
       "price": 999,
       "oldPrice": 1129,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -251,7 +258,7 @@
     "o15-lenovo-loq-15-US": {
       "price": 979,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -260,7 +267,7 @@
     "o16-hp-omen-16-US": {
       "price": 1749,
       "oldPrice": 1999,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -269,16 +276,18 @@
     "o17-hp-omen-16-DE": {
       "price": 1729,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "not scraped (site needs API key or blocks bots)"
+      "lastNote": "not scraped (site needs API key or blocks bots)",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o18-alienware-m16-US": {
       "price": 1899,
       "oldPrice": 2099,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -287,7 +296,7 @@
     "o19-alienware-m16-US": {
       "price": 1859,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -296,7 +305,7 @@
     "o20-asus-tuf-a15-US": {
       "price": 1199,
       "oldPrice": 1399,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -305,7 +314,7 @@
     "o21-asus-tuf-a15-BE": {
       "price": 1249,
       "oldPrice": 1349,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -314,16 +323,18 @@
     "o22-legion-5-US": {
       "price": 1349,
       "oldPrice": 1499,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "search http 0 fetch failed"
+      "lastNote": "search http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o23-legion-5-BE": {
       "price": 1399,
       "oldPrice": 1549,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -332,7 +343,7 @@
     "o24-razer-blade-14-US": {
       "price": 2299,
       "oldPrice": 2599,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -341,7 +352,7 @@
     "o25-razer-blade-14-US": {
       "price": 2249,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -350,7 +361,7 @@
     "o26-gigabyte-aero-16-US": {
       "price": 2099,
       "oldPrice": 2299,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -359,16 +370,18 @@
     "o27-gigabyte-aero-16-US": {
       "price": 2049,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "http 0 fetch failed"
+      "lastNote": "http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o28-acer-nitro-v-15-US": {
       "price": 949,
       "oldPrice": 1099,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -377,7 +390,7 @@
     "o29-acer-nitro-v-15-BE": {
       "price": 999,
       "oldPrice": 1099,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -386,7 +399,7 @@
     "o30-dell-g15-US": {
       "price": 999,
       "oldPrice": 1149,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -395,7 +408,7 @@
     "o31-dell-g15-US": {
       "price": 979,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -404,7 +417,7 @@
     "o32-msi-stealth-16-ai-US": {
       "price": 1899,
       "oldPrice": 2099,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -413,16 +426,18 @@
     "o33-msi-stealth-16-ai-US": {
       "price": 1849,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "search http 0 fetch failed"
+      "lastNote": "search http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o34-macbook-pro-14-m4pro-US": {
       "price": 1999,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -431,7 +446,7 @@
     "o35-macbook-pro-14-m4pro-BE": {
       "price": 1999,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -440,7 +455,7 @@
     "o36-macbook-pro-16-m4pro-US": {
       "price": 2499,
       "oldPrice": 2699,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -449,7 +464,7 @@
     "o37-macbook-pro-16-m4pro-BE": {
       "price": 2499,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -458,16 +473,18 @@
     "o38-macbook-air-15-m4-US": {
       "price": 1199,
       "oldPrice": 1399,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "no price found (Apple)"
+      "lastNote": "no price found (Apple)",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o39-macbook-air-15-m4-US": {
       "price": 1179,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -476,7 +493,7 @@
     "o40-macbook-air-13-m4-US": {
       "price": 999,
       "oldPrice": 1099,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -485,7 +502,7 @@
     "o41-macbook-air-13-m4-US": {
       "price": 989,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -494,7 +511,7 @@
     "o42-dell-14-premium-US": {
       "price": 1499,
       "oldPrice": 1649,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -503,16 +520,18 @@
     "o43-thinkpad-x1-carbon-US": {
       "price": 1999,
       "oldPrice": 2299,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "http 0 fetch failed"
+      "lastNote": "http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o44-thinkpad-x1-carbon-BE": {
       "price": 2049,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -521,7 +540,7 @@
     "o45-thinkpad-t14s-US": {
       "price": 1449,
       "oldPrice": 1699,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -530,7 +549,7 @@
     "o46-thinkpad-t14s-DE": {
       "price": 1429,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -539,7 +558,7 @@
     "o47-hp-spectre-x360-14-US": {
       "price": 1799,
       "oldPrice": 1999,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -548,7 +567,7 @@
     "o48-hp-spectre-x360-14-US": {
       "price": 1749,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -557,16 +576,18 @@
     "o49-yoga-9i-US": {
       "price": 1699,
       "oldPrice": 1899,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "http 0 fetch failed"
+      "lastNote": "http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o50-yoga-9i-US": {
       "price": 1649,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -575,7 +596,7 @@
     "o51-framework-13-US": {
       "price": 1599,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -584,7 +605,7 @@
     "o52-framework-13-US": {
       "price": 1649,
       "oldPrice": 1799,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -593,7 +614,7 @@
     "o53-surface-laptop-7-US": {
       "price": 1399,
       "oldPrice": 1599,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -602,16 +623,18 @@
     "o54-surface-laptop-7-US": {
       "price": 1379,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "search http 0 fetch failed"
+      "lastNote": "search http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o55-galaxy-book4-ultra-US": {
       "price": 1899,
       "oldPrice": 2199,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -620,7 +643,7 @@
     "o56-galaxy-book4-ultra-UK": {
       "price": 1799,
       "oldPrice": 1999,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -629,7 +652,7 @@
     "o57-galaxy-book4-US": {
       "price": 1299,
       "oldPrice": 1499,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -638,7 +661,7 @@
     "o58-galaxy-book4-DE": {
       "price": 1279,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -647,16 +670,18 @@
     "o59-asus-proart-p16-US": {
       "price": 2499,
       "oldPrice": 2799,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "not scraped (site needs API key or blocks bots)"
+      "lastNote": "not scraped (site needs API key or blocks bots)",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o60-asus-proart-p16-US": {
       "price": 2449,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -665,7 +690,7 @@
     "o61-zenbook-pro-16x-US": {
       "price": 2299,
       "oldPrice": 2599,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -674,7 +699,7 @@
     "o62-zenbook-pro-16x-DE": {
       "price": 2249,
       "oldPrice": 2499,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -683,7 +708,7 @@
     "o63-zenbook-14-US": {
       "price": 1299,
       "oldPrice": 1499,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -692,7 +717,7 @@
     "o64-zenbook-14-BE": {
       "price": 1249,
       "oldPrice": 1399,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -701,16 +726,18 @@
     "o65-swift-go-14-US": {
       "price": 999,
       "oldPrice": 1199,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "search http 0 fetch failed"
+      "lastNote": "search http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o66-swift-go-14-UK": {
       "price": 899,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -719,7 +746,7 @@
     "o67-ideapad-pro-5-US": {
       "price": 1049,
       "oldPrice": 1199,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -728,7 +755,7 @@
     "o68-ideapad-pro-5-FR": {
       "price": 1029,
       "oldPrice": 1149,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -737,7 +764,7 @@
     "o69-vivobook-16-BE": {
       "price": 799,
       "oldPrice": 899,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -746,16 +773,18 @@
     "o70-vivobook-16-BE": {
       "price": 779,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "not scraped (site needs API key or blocks bots)"
+      "lastNote": "not scraped (site needs API key or blocks bots)",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o71-ideapad-slim-5-US": {
       "price": 949,
       "oldPrice": 1049,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -764,7 +793,7 @@
     "o72-ideapad-slim-5-BE": {
       "price": 899,
       "oldPrice": 999,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -773,7 +802,7 @@
     "o73-hp-pavilion-plus-14-US": {
       "price": 899,
       "oldPrice": 999,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -782,7 +811,7 @@
     "o74-hp-pavilion-plus-14-FR": {
       "price": 859,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -791,16 +820,18 @@
     "o75-ideapad-flex-5-US": {
       "price": 649,
       "oldPrice": 729,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
-      "lastNote": "search http 0 fetch failed"
+      "lastNote": "search http 0 fetch failed",
+      "linkOk": false,
+      "linkNote": "http 0 fetch failed"
     },
     "o76-ideapad-flex-5-US": {
       "price": 629,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -809,7 +840,7 @@
     "o77-hp-pavilion-15-US": {
       "price": 599,
       "oldPrice": 679,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -818,7 +849,7 @@
     "o78-hp-pavilion-15-US": {
       "price": 579,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -827,7 +858,7 @@
     "o79-aspire-go-15-US": {
       "price": 499,
       "oldPrice": 549,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",
@@ -836,7 +867,7 @@
     "o80-aspire-go-15-BE": {
       "price": 549,
       "oldPrice": null,
-      "updatedAt": 1787617743687,
+      "updatedAt": 1787618277348,
       "verified": false,
       "verifiedAt": null,
       "source": "seed",

@@ -26,8 +26,13 @@ export async function scrapeOffer(offer, laptop, log = () => {}) {
   const query = sc.query || laptop.name;
   const t0 = Date.now();
   try {
-    let r;
-    switch (sc.kind) {
+    let r = null;
+    // Best Buy: prefer the official API (exact price/sale/stock/URL) when a free key is configured
+    if (sc.kind === 'search' && (sc.host || '').includes('bestbuy.com') && process.env.BESTBUY_CLIENT_ID) {
+      r = await F.scrapeBestBuyApi(query);
+      if (!r.ok && r.skipped) r = null; // no key → fall through to search-page scraping
+    }
+    if (!r) switch (sc.kind) {
       case 'jsonld':
         r = await F.scrapeJsonLd(sc.url, sc.host || new URL(sc.url).hostname, sc.brand);
         break;

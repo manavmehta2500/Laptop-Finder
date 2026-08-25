@@ -18,6 +18,9 @@
  */
 import express from 'express';
 import cors from 'cors';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../src/data/catalog.mjs';
 import { TRACKED_SITES, COUNTRY_BY_CODE, CURRENCY_SYMBOL } from '../src/data/config.mjs';
 import { scrapeAll, siteSummary } from './scraper.mjs';
@@ -215,6 +218,16 @@ app.get('/api/events', (req, res) => {
 });
 
 const MODE = process.env.MONITOR || 'live';
+
+// On a deployed VM, serve the built site from this same process (single port)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distDir = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distDir)) {
+  app.use(express.static(distDir));
+  app.get(/^(?!\/api\/).*/, (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
+  console.log('[monitor] serving built site from dist/ (single-port deploy)');
+}
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`[monitor] laptop-finder monitor server on :${PORT} — tracking ${offerIndex.size} offers across ${TRACKED_SITES.length} sites (mode: ${MODE})`);
   if (MODE === 'sim') scheduleNext();

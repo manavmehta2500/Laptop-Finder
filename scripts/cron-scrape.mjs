@@ -16,6 +16,8 @@ import path from 'node:path';
 import { CATALOG } from '../src/data/catalog.mjs';
 import { COUNTRIES, TRACKED_SITES } from '../src/data/config.mjs';
 import { scrapeAll, siteSummary } from '../server/scraper.mjs';
+import { verifyOfferLink, pickLinkSample } from '../server/scrape/links.mjs';
+import { discover } from '../server/scrape/discover.mjs';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const dataDir = path.join(root, 'public', 'data');
@@ -65,17 +67,53 @@ for (const l of CATALOG) {
   }
 }
 
+// ── link verification + discovery (bounded time, parallel) ─────────────────
+fs.mkdirSync(dataDir, { recursive: true });
+const salt = Math.floor(now / (10 * 60 * 1000)) % 100; // rotates with each 10-min cycle
+const sample = pickLinkSample(CATALOG, 15, salt);
+let badLinks = 0;
+const linkTasks = sample.map(async ({ laptop, offer }) => {
+  const v = await verifyOfferLink(offer, laptop);
+  offers[offer.id].linkOk = v.linkOk;
+  if (v.linkNote) offers[offer.id].linkNote = v.linkNote;
+  if (!v.linkOk) badLinks += 1;
+  console.log(`[cron] link ${v.linkOk ? 'OK  ' : 'BAD '} ${offer.site.padEnd(16)} ${offer.url.slice(0, 70)}`);
+});
+const knownNames = CATALOG.flatMap((l) => [l.name, `${l.brand} ${l.line} ${l.name}`]);
+const discoverTask = (async () => {
+  try {
+    const disc = await discover({ knownNames, log: (src, what) => console.log(`[cron] discover ${src.padEnd(16)} ${what}`) });
+    fs.writeFileSync(path.join(dataDir, 'discovered.json'), JSON.stringify(disc, null, 2));
+    console.log(`[cron] discovery: ${disc.count} new laptop candidates`);
+  } catch (e) {
+    console.log('[cron] discovery failed (non-fatal):', e.message);
+  }
+})();
+// run link checks 5-at-a-time; hard stop the whole block at 120s so the
+// price snapshot ALWAYS gets written on time
+const linkPool = (async () => {
+  let i = 0;
+  await Promise.all([...Array(5)].map(async () => {
+    while (i < linkTasks.length) {
+      const t = linkTasks[i++];
+      await t;
+    }
+  }));
+})();
+await Promise.race([Promise.allSettled([linkPool, discoverTask]), new Promise((r) => setTimeout(r, 120_000))]);
+console.log('[cron] link+discovery phase done (or cut at 120s)');
+
 const prices = {
   generatedAt: new Date(now).toISOString(),
-  generator: 'laptop-finder monitor (github actions cron)',
+  generator: 'laptop-finder monitor (24/7 cron)',
   durationMs: Date.now() - started,
   liveCount: live,
   keptCount: kept,
+  badLinks,
   sites: siteSummary(CATALOG, results),
   offers,
 };
 
-fs.mkdirSync(dataDir, { recursive: true });
 fs.writeFileSync(pricesPath, JSON.stringify(prices, null, 2));
 
 // bootstrap.json = static catalog + config, so the Pages deploy is self-contained

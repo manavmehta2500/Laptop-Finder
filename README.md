@@ -20,21 +20,30 @@ Opens the app on **http://localhost:5173** and starts the price-monitor API on *
 | `npm run dev:web` | Web only |
 | `npm run build` | Type-check + production build |
 
-## Go live in 3 steps (free, 24/7, no card)
+## Go live — two free 24/7 options
 
-The monitor runs as a **GitHub Actions cron job every 10 minutes** — free, always on, no server to babysit. It scrapes all tracked websites from GitHub's runners, commits the price snapshot, and GitHub Pages redeploys the site automatically.
+### Option A — free always-on VM (BEST coverage: real browser + 5-min updates)
+Oracle Cloud **Always Free** VM (or GCP e2-micro) — $0, needs a card for identity verification, never charged. One command:
 
-1. **Merge this branch** into `main` (or work on it directly).
-2. **Add the workflow file** `.github/workflows/laptop-finder.yml` on `main` (the Arena GitHub integration is not allowed to push workflow files — paste it from this repo's branch or the content below).
-3. **Enable Pages**: repo → *Settings → Pages → Build and deploy → Source: GitHub Actions*.
+```bash
+# on the VM (Ubuntu):
+bash scripts/deploy-vm.sh
+```
 
-That's it — within ~1 minute the first scrape runs and the site is live at
-`https://<your-username>.github.io/Laptop-Finder/`.
+It installs Node 22 + Chromium, builds the site, and starts a systemd service that serves the app **and** runs the live monitor (scrapes every 5 min, `PLAYWRIGHT=1` real-browser fallback for bot-protected sites). Live at `http://<vm-ip>:8080`.
 
-Notes:
-- Scheduled Actions jobs only run from the **default branch** — that's why the workflow must live on `main`.
-- Sites that block datacenter IPs (Amazon, Best Buy, MediaMarkt, Bol…) degrade gracefully: their offers keep the last verified price and show an **unverified** badge. Manufacturer stores (Apple, Dell, HP, Razer, ASUS/ROG, Lenovo, Samsung, Framework/Shopify, Currys, Micro Center…) usually report live.
-- `npm run dev` runs the same real scraper locally (SSE push). `MONITOR=sim npm run dev` gives the fast simulated feed for offline UI work.
+### Option B — GitHub Actions cron (no card, zero setup)
+A cron job every 10 minutes scrapes from GitHub's runners, commits the price snapshot, and GitHub Pages redeploys:
+
+1. **Merge this branch** into `main`.
+2. **Add `.github/workflows/laptop-finder.yml`** on `main` (the Arena GitHub integration can't push workflow files — see chat for the content).
+3. **Settings → Pages → Source: GitHub Actions.**
+
+Live at `https://<your-username>.github.io/Laptop-Finder/`. Scheduled jobs only run from the default branch.
+
+### Optional accuracy upgrades (free)
+- **Best Buy API key** (minutes, free at bestbuyopenapi.com) → set `BESTBUY_CLIENT_ID`: exact price, sale price, stock and canonical URL for all Best Buy offers, plus Best Buy catalog discovery.
+- `MONITOR=sim npm run dev` → fast simulated feed for offline UI work.
 
 ## What you get
 
@@ -45,8 +54,11 @@ Notes:
 - A "Duty-free to {country}" toggle hides any offer that would incur import tax.
 
 ### The live monitor (24/7, real scraping)
-- **Production**: `scripts/cron-scrape.mjs` runs on GitHub Actions every 10 min — it scrapes every offer (JSON-LD product pages, search-page + matcher for the rest, Shopify for Framework, Micro Center's rendered search) and commits `public/data/prices.json`. The Pages site polls that file every 60s, so the deployed site updates live with flash animations + toasts.
-- **Local dev**: `server/index.mjs` runs the same scraper on an interval (default 10 min, `SCRAPE_INTERVAL_MS` to tune) and pushes changes over SSE. `MONITOR=sim` switches to a fast simulated feed for offline work.
+- **Production**: `scripts/cron-scrape.mjs` (GitHub Actions every 10 min) or the same engine inside the VM's systemd service (every 5 min). Each cycle:
+  1. **scrape** every offer — JSON-LD product pages, search-page + matcher, Shopify, Micro Center rendered search, Best Buy official API (with a free key), and a **real Chromium browser fallback** (`PLAYWRIGHT=1`) for sites that bot-block plain requests
+  2. **verify a rotating sample of links** — the page must load and actually contain the laptop it claims to be (`linkOk`)
+  3. **discover** laptops we don't track yet (brand listing pages + Best Buy API) → `public/data/discovered.json`
+  4. commit `public/data/prices.json` → the deployed site updates live (flash + toast on the browser)
 - The **"AI" step** is `server/scrape/matcher.mjs` — a deterministic, model-code-aware scorer that picks the exact product from a page of candidates (no API keys needed; swap in an LLM later if you want semantic matching).
 - Only **proper retailers & manufacturer stores** are on the allow-list (MediaMarkt, Coolblue, Alternate, Micro Center, Best Buy, B&H, Currys, Scan, LDLC, Fnac, Bol, Notebooksbilliger, Amazon, Apple, Lenovo, ASUS/ROG, Dell, HP, MSI, Razer, Framework, Acer, Samsung, Microsoft…). **No eBay, AliExpress, Alibaba, Temu or private marketplaces.**
 - Every offer links out to the exact retailer page for that model.
@@ -79,7 +91,8 @@ Every dimension, with live per-option result counts (unavailable options gray ou
 scripts/cron-scrape.mjs the monitor job (runs on GitHub Actions)
 server/index.mjs        dev server: Express + SSE + live scrape engine
 server/scraper.mjs      scrape dispatcher + price sanity checks + site stats
-server/scrape/          fetchers (JSON-LD, search, Shopify, Micro Center, Apple) + matcher
+server/scrape/          fetchers (JSON-LD, search, Shopify, Micro Center, Apple, Best Buy API)
+                        + browser fallback (Playwright) + matcher + link verification + discovery
 src/data/catalog.mjs    40 laptops · 80 offers (each with a scrape strategy) — shared by server, UI, cron
 src/data/config.mjs     countries, FX rates, import-tax table, tracked-site allow-list
 src/lib/filter.ts       matching engine, faceted counts, price/tax math, slider domains

@@ -3,15 +3,17 @@
  * null instead of throwing, so one stubborn site can never kill a run.
  */
 import { pickBest } from './matcher.mjs';
+import { fetchWithBrowser, looksBlocked } from './browser.mjs';
 
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
-export async function fetchPage(url, { timeout = 20000 } = {}) {
+export async function fetchPage(url, { timeout = 20000, allowBrowser = true } = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeout);
+  let res;
   try {
-    const res = await fetch(url, {
+    res = await fetch(url, {
       redirect: 'follow',
       signal: ctrl.signal,
       headers: {
@@ -33,9 +35,24 @@ export async function fetchPage(url, { timeout = 20000 } = {}) {
       }
       return { status: res.status, html: null, json, text };
     }
-    return { status: res.status, html: text, json: null, text };
+    const result = { status: res.status, html: text, json: null, text };
+    // bot-blocked? fall back to a real browser (when enabled)
+    if (allowBrowser && looksBlocked(res.status, text)) {
+      const viaBrowser = await fetchWithBrowser(url, { timeout: timeout + 10000 });
+      if (viaBrowser && viaBrowser.html && !looksBlocked(200, viaBrowser.html)) {
+        return { status: 200, html: viaBrowser.html, json: null, viaBrowser: true };
+      }
+      if (viaBrowser?.error) result.browserError = viaBrowser.error;
+    }
+    return result;
   } catch (e) {
-    return { status: 0, error: e.name === 'AbortError' ? 'timeout' : String(e.message || e), html: null, json: null };
+    const netErr = { status: 0, error: e.name === 'AbortError' ? 'timeout' : String(e.message || e), html: null, json: null };
+    // network-level failures (DNS/proxy) can also be worth a browser retry
+    if (allowBrowser) {
+      const viaBrowser = await fetchWithBrowser(url, { timeout: timeout + 10000 });
+      if (viaBrowser && viaBrowser.html) return { status: 200, html: viaBrowser.html, json: null, viaBrowser: true };
+    }
+    return netErr;
   } finally {
     clearTimeout(t);
   }
@@ -200,4 +217,45 @@ export async function scrapeApple(url) {
     if (m) return { ok: true, price: parseFloat(m[1].replace(/,/g, '')), currency: 'USD', inStock: true, url };
   }
   return { ok: false, note: 'no price found (Apple)' };
+}
+
+/**
+ * Best Buy official API — the gold standard: exact price, sale price,
+ * stock status and the canonical product URL in one call.
+ * Free client id: https://bestbuyopenapi.com (takes minutes). Set
+ * BESTBUY_CLIENT_ID in the environment to activate it.
+ */
+export async function scrapeBestBuyApi(query) {
+  const key = process.env.BESTBUY_CLIENT_ID;
+  if (!key) return { ok: false, skipped: true, note: 'no BESTBUY_CLIENT_ID set' };
+  const url =
+    'https://api.bestbuy.com/v1/products?format=json&showModelNumber=true&showImages=true' +
+    '&fields=simpleName,price,salePrice,stock,url,image,brandName' +
+    `&q=${encodeURIComponent(query)}`;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const res = await fetch(url, { headers: { 'Client-ID': key, 'User-Agent': UA }, signal: ctrl.signal });
+    if (!res.ok) return { ok: false, note: `bestbuy api ${res.status}` };
+    const data = await res.json();
+    const items = data.products || [];
+    if (!items.length) return { ok: false, note: 'no bestbuy results' };
+    const it = items[0];
+    const price = parseFloat(it.salePrice ?? it.price ?? '0');
+    if (!price) return { ok: false, note: 'bestbuy result without price' };
+    return {
+      ok: true,
+      price,
+      oldPrice: it.salePrice != null && it.salePrice < it.price ? parseFloat(it.price) : null,
+      inStock: it.stock !== 'outOfStock',
+      url: it.url || null,
+      image: it.image?.large || null,
+      name: it.simpleName,
+      products: items, // full list (used by discovery)
+    };
+  } catch (e) {
+    return { ok: false, note: `bestbuy api: ${e.message}` };
+  } finally {
+    clearTimeout(t);
+  }
 }
