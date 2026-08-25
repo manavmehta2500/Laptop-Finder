@@ -20,6 +20,22 @@ Opens the app on **http://localhost:5173** and starts the price-monitor API on *
 | `npm run dev:web` | Web only |
 | `npm run build` | Type-check + production build |
 
+## Go live in 3 steps (free, 24/7, no card)
+
+The monitor runs as a **GitHub Actions cron job every 10 minutes** — free, always on, no server to babysit. It scrapes all tracked websites from GitHub's runners, commits the price snapshot, and GitHub Pages redeploys the site automatically.
+
+1. **Merge this branch** into `main` (or work on it directly).
+2. **Add the workflow file** `.github/workflows/laptop-finder.yml` on `main` (the Arena GitHub integration is not allowed to push workflow files — paste it from this repo's branch or the content below).
+3. **Enable Pages**: repo → *Settings → Pages → Build and deploy → Source: GitHub Actions*.
+
+That's it — within ~1 minute the first scrape runs and the site is live at
+`https://<your-username>.github.io/Laptop-Finder/`.
+
+Notes:
+- Scheduled Actions jobs only run from the **default branch** — that's why the workflow must live on `main`.
+- Sites that block datacenter IPs (Amazon, Best Buy, MediaMarkt, Bol…) degrade gracefully: their offers keep the last verified price and show an **unverified** badge. Manufacturer stores (Apple, Dell, HP, Razer, ASUS/ROG, Lenovo, Samsung, Framework/Shopify, Currys, Micro Center…) usually report live.
+- `npm run dev` runs the same real scraper locally (SSE push). `MONITOR=sim npm run dev` gives the fast simulated feed for offline UI work.
+
 ## What you get
 
 ### Country & tax engine
@@ -28,11 +44,13 @@ Opens the app on **http://localhost:5173** and starts the price-monitor API on *
 - Budget slider, totals and sorting all operate on the tax-inclusive total in your currency.
 - A "Duty-free to {country}" toggle hides any offer that would incur import tax.
 
-### The live monitor (24/7)
-- A background process (`server/index.mjs`) keeps price state for every tracked offer and streams changes over **SSE** — cards flash green/red, the header badge counts updates, and toasts announce every deal start/end and price move in real time.
+### The live monitor (24/7, real scraping)
+- **Production**: `scripts/cron-scrape.mjs` runs on GitHub Actions every 10 min — it scrapes every offer (JSON-LD product pages, search-page + matcher for the rest, Shopify for Framework, Micro Center's rendered search) and commits `public/data/prices.json`. The Pages site polls that file every 60s, so the deployed site updates live with flash animations + toasts.
+- **Local dev**: `server/index.mjs` runs the same scraper on an interval (default 10 min, `SCRAPE_INTERVAL_MS` to tune) and pushes changes over SSE. `MONITOR=sim` switches to a fast simulated feed for offline work.
+- The **"AI" step** is `server/scrape/matcher.mjs` — a deterministic, model-code-aware scorer that picks the exact product from a page of candidates (no API keys needed; swap in an LLM later if you want semantic matching).
 - Only **proper retailers & manufacturer stores** are on the allow-list (MediaMarkt, Coolblue, Alternate, Micro Center, Best Buy, B&H, Currys, Scan, LDLC, Fnac, Bol, Notebooksbilliger, Amazon, Apple, Lenovo, ASUS/ROG, Dell, HP, MSI, Razer, Framework, Acer, Samsung, Microsoft…). **No eBay, AliExpress, Alibaba, Temu or private marketplaces.**
-- Each offer links out to the exact retailer page for that model.
-- ⚠️ In this repo the monitor runs a **simulation engine** that applies realistic price/discount events (swap `monitorTick()` for Playwright scrapers per `TRACKED_SITES` to go fully live — the event contract stays identical). Prices/links/images are a realistic seed snapshot, not a live crawl.
+- Every offer links out to the exact retailer page for that model.
+- Graceful degradation: a blocked site never breaks a run — its offers keep the last verified price and show an **unverified** badge until the next successful scrape.
 
 ### The filter panel
 Every dimension, with live per-option result counts (unavailable options gray out and sink to the bottom):
@@ -57,12 +75,17 @@ Every dimension, with live per-option result counts (unavailable options gray ou
 ## Architecture
 
 ```
-server/index.mjs        Express + SSE + monitor engine (in-memory price state)
-src/data/catalog.mjs    40 laptops · 80 offers — single source of truth (shared by server & UI)
+.github/workflows/      24/7 cron: scrape → commit → build → Pages deploy
+scripts/cron-scrape.mjs the monitor job (runs on GitHub Actions)
+server/index.mjs        dev server: Express + SSE + live scrape engine
+server/scraper.mjs      scrape dispatcher + price sanity checks + site stats
+server/scrape/          fetchers (JSON-LD, search, Shopify, Micro Center, Apple) + matcher
+src/data/catalog.mjs    40 laptops · 80 offers (each with a scrape strategy) — shared by server, UI, cron
 src/data/config.mjs     countries, FX rates, import-tax table, tracked-site allow-list
 src/lib/filter.ts       matching engine, faceted counts, price/tax math, slider domains
 src/lib/types.ts        shared TypeScript types
 src/components/…        FilterPanel, LaptopCard, Header, CountryModal, Toasts, …
+public/data/            generated: prices.json (live snapshot) + bootstrap.json
 ```
 
 Country → import-rate logic lives in `importRateFor()`: same free-trade region (EU single market, etc.) = 0% extra; otherwise the destination's VAT/duty applies. FX rates are a static snapshot in `FX_RATES` (swap for a live FX feed in production).
