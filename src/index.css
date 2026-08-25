@@ -1,0 +1,96 @@
+@import '@fontsource-variable/inter';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-50 text-ink-950 font-sans antialiased;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c6cce0 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #c6cce0;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── glass ─────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+
+/* ── skeleton shimmer ──────────────────────────────── */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #e8ebf4;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+/* ── dual range slider ─────────────────────────────── */
+.dual-slider {
+  -webkit-tap-highlight-color: transparent;
+}
+.dual-slider .thumb {
+  touch-action: none;
+  cursor: grab;
+}
+.dual-slider .thumb:active {
+  cursor: grabbing;
+}
+
+/* hide number input spinners */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ── subtle dotted grid for hero ───────────────────── */
+.dot-grid {
+  background-image: radial-gradient(rgba(38, 43, 61, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
